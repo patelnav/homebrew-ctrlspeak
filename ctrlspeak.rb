@@ -1,8 +1,8 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "893ed3dc9061dec1de579d5db41a20b5562b91b9c32ad3696e90f68a3e92ebb9"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "7cfff1edd1bdb537c7bbd7f2eebcfa14c44c2f416b6e5477021831a57e43ea60"
   license "MIT"
 
   depends_on "python@3.11"  # Using Python 3.11 as it's more stable in Homebrew
