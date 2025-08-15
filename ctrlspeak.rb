@@ -5,8 +5,7 @@ class Ctrlspeak < Formula
   sha256 "80c3333c1be9a7f5ae0fe12e1cea3ba0ac8aa1fcb2f5fcac2d13a169c81c0c3e"
   license "MIT"
 
-  depends_on "python@3.11"  # Using Python 3.11 as it's more stable in Homebrew
-  depends_on "uv" => :optional  # Optional dependency for faster package installation
+  depends_on "python@3.11" # Using Python 3.11 as it's more stable in Homebrew
 
   def install
     # Set up virtualenv
@@ -16,21 +15,29 @@ class Ctrlspeak < Formula
     # Print requirements for visibility
     ohai "Installing the following Python packages:"
     system "cat", "requirements.txt"
-    
     # Add informational message about long-running process
     ohai "Starting package installation - this may take several minutes"
     opoo "Large packages like torch, torchaudio, and nemo_toolkit will be downloaded (~1GB)"
-    
-    # Determine whether to use uv or pip for package installation
-    if build.with? "uv"
-      # Use UV for faster package installation
-      ohai "Using UV for faster package installation"
-      system "uv", "pip", "install", "-r", "requirements.txt", "--prefix", venv, "--verbose"
+    # Prefer uv if available via Homebrew, otherwise fallback to pip
+    # Prefer uv if available via Homebrew, otherwise fallback to pip
+    uv_executable = nil
+    begin
+      uv_formula = Formula["uv"]
+      if uv_formula&.any_version_installed?
+        uv_executable = uv_formula.opt_bin/"uv"
+      end
+    rescue
+      uv_executable = nil
+    end
+    # Fallback: check the typical Homebrew prefix path directly
+    uv_executable ||= Pathname.new(HOMEBREW_PREFIX)/"opt"/"uv"/"bin"/"uv"
+
+    if uv_executable&.exist?
+      ohai "Detected uv at #{uv_executable}; using uv for faster package installation"
+      system uv_executable, "pip", "install", "-r", "requirements.txt", "--prefix", venv, "--verbose"
     else
-      # Use standard pip with maximum verbosity
-      ohai "Upgrading pip - this is quick"
+      ohai "uv not found; using pip"
       system venv/"bin/pip", "install", "--upgrade", "pip", "-v"
-      
       ohai "Installing packages - please be patient, torch and nemo_toolkit are large packages"
       system venv/"bin/pip", "install", "-r", "requirements.txt", "-v"
     end
@@ -42,31 +49,25 @@ class Ctrlspeak < Formula
     libexec.install "models"
     libexec.install "on.wav"
     libexec.install "off.wav"
-    
     ohai "Creating wrapper script"
     # Create a wrapper script that sets up the Python path correctly
     # and also sets the DYLD_LIBRARY_PATH to find the torch and torchaudio libraries
     (bin/"ctrlspeak").write <<~EOS
       #!/bin/bash
       source "#{venv}/bin/activate"
-      
       # Set the Python path to include the libexec directory
       export PYTHONPATH="#{libexec}:$PYTHONPATH"
-      
       # Set the dynamic library path to find the torch and torchaudio libraries
       TORCH_LIB_PATH="#{venv}/lib/python3.11/site-packages/torch/lib"
       TORCHAUDIO_LIB_PATH="#{venv}/lib/python3.11/site-packages/torchaudio/lib"
-      
       # Add both library paths to DYLD_LIBRARY_PATH
       export DYLD_LIBRARY_PATH="$TORCH_LIB_PATH:$TORCHAUDIO_LIB_PATH:$DYLD_LIBRARY_PATH"
-      
       # Run the script
       python "#{libexec}/ctrlspeak.py" "$@"
     EOS
 
     # Make the wrapper executable
     chmod 0755, bin/"ctrlspeak"
-    
     ohai "Installation complete!"
   end
 
@@ -85,7 +86,7 @@ class Ctrlspeak < Formula
 
   test do
     # Add a basic test to check if the script exists and is executable
-    assert_predicate bin/"ctrlspeak", :exist?
-    assert_predicate bin/"ctrlspeak", :executable?
+    assert_path_exists bin/"ctrlspeak"
+    assert_match(/bash/, (bin/"ctrlspeak").read)
   end
-end 
+end
