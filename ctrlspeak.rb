@@ -1,8 +1,8 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.0.tar.gz"
-  sha256 "80c3333c1be9a7f5ae0fe12e1cea3ba0ac8aa1fcb2f5fcac2d13a169c81c0c3e"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.1.tar.gz"
+  sha256 "f4f2b9e725eadc53e05122b0d69b09eca35376991a6746988fcea8a618e0a0c9"
   license "MIT"
 
   depends_on "python@3.11" # Using Python 3.11 as it's more stable in Homebrew
@@ -43,8 +43,8 @@ class Ctrlspeak < Formula
     end
 
     ohai "Copying application files"
-    # Copy the main script and necessary files
-    libexec.install "ctrlspeak.py"
+    # Copy all Python files and necessary directories/files
+    libexec.install Dir["*.py"]
     libexec.install "utils"
     libexec.install "models"
     libexec.install "on.wav"
