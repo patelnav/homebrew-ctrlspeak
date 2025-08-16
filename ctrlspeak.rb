@@ -1,9 +1,10 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.3.tar.gz"
-  sha256 "3f09f5df5dafdd59bea41fb9507be2dc5ec9769dbb4dc0af66c87c6c573317e5"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.4.tar.gz"
+  sha256 "2b7ec0a83faa56163a63b8d66b0d176438292d6d8409cdf86cdcd1cc091a77d6"
   license "MIT"
+  head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
   depends_on "python@3.11" # Using Python 3.11 as it's more stable in Homebrew
 
@@ -12,14 +13,7 @@ class Ctrlspeak < Formula
     venv = libexec/"venv"
     system "python3.11", "-m", "venv", venv
 
-    # Print requirements for visibility
-    ohai "Installing the following Python packages:"
-    system "cat", "requirements.txt"
-    # Add informational message about long-running process
-    ohai "Starting package installation - this may take several minutes"
-    opoo "Large packages like torch, torchaudio, and nemo_toolkit will be downloaded (~1GB)"
-    # Prefer uv if available via Homebrew, otherwise fallback to pip
-    # Prefer uv if available via Homebrew, otherwise fallback to pip
+    # Check for uv
     uv_executable = nil
     begin
       uv_formula = Formula["uv"]
@@ -29,17 +23,37 @@ class Ctrlspeak < Formula
     rescue
       uv_executable = nil
     end
-    # Fallback: check the typical Homebrew prefix path directly
     uv_executable ||= Pathname.new(HOMEBREW_PREFIX)/"opt"/"uv"/"bin"/"uv"
 
+    ohai "Starting package installation - this may take several minutes"
+    opoo "Large packages like torch, torchaudio, and nemo_toolkit will be downloaded (~1GB)"
+
     if uv_executable&.exist?
-      ohai "Detected uv at #{uv_executable}; using uv for faster package installation"
-      system uv_executable, "pip", "install", "-r", "requirements.txt", "--prefix", venv, "--verbose"
+      ohai "Using uv for package installation"
+      with_env("VIRTUAL_ENV" => venv) do
+        # Install requirements.txt first
+        ohai "Installing core requirements"
+        system uv_executable, "pip", "install", "-r", "requirements.txt", "--verbose"
+        
+        # Then install MLX requirements on ARM
+        if Hardware::CPU.arm?
+          ohai "Installing MLX requirements for Apple Silicon"
+          system uv_executable, "pip", "install", "-r", "requirements-mlx.txt", "--verbose"
+        end
+      end
     else
-      ohai "uv not found; using pip"
+      ohai "Using pip for package installation"
       system venv/"bin/pip", "install", "--upgrade", "pip", "-v"
-      ohai "Installing packages - please be patient, torch and nemo_toolkit are large packages"
+      
+      # Install requirements.txt first
+      ohai "Installing core requirements"
       system venv/"bin/pip", "install", "-r", "requirements.txt", "-v"
+      
+      # Then install MLX requirements on ARM
+      if Hardware::CPU.arm?
+        ohai "Installing MLX requirements for Apple Silicon"
+        system venv/"bin/pip", "install", "-r", "requirements-mlx.txt", "-v"
+      end
     end
 
     ohai "Copying application files"
@@ -49,6 +63,7 @@ class Ctrlspeak < Formula
     libexec.install "models"
     libexec.install "on.wav"
     libexec.install "off.wav"
+
     ohai "Creating wrapper script"
     # Create a wrapper script that sets up the Python path correctly
     # and also sets the DYLD_LIBRARY_PATH to find the torch and torchaudio libraries
