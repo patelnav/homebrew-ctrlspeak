@@ -1,8 +1,8 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.5.tar.gz"
-  sha256 "d80b781d2c2dfad2693669e623d5d02effcc3e8b4b1eb26579170e29ae21e27c"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.6.tar.gz"
+  sha256 "eb979daa32c03ff0a20aaad777096698b3713bd90c089f096cfd82613ae33827"
   license "MIT"
   head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
@@ -36,6 +36,7 @@ class Ctrlspeak < Formula
         # Install requirements.txt first
         ohai "Installing core requirements"
         system uv_executable, "pip", "install", "-r", "requirements.txt", "--verbose"
+        system uv_executable, "pip", "install", "-r", "requirements-mlx.txt", "--verbose"
 
         if build.with? "nvidia"
           ohai "Installing NVIDIA requirements"
@@ -54,6 +55,7 @@ class Ctrlspeak < Formula
       # Install requirements.txt first
       ohai "Installing core requirements"
       system venv/"bin/pip", "install", "-r", "requirements.txt", "-v"
+      system venv/"bin/pip", "install", "-r", "requirements-mlx.txt", "-v"
 
       if build.with? "nvidia"
         ohai "Installing NVIDIA requirements"
