@@ -1,12 +1,15 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.4.tar.gz"
-  sha256 "2b7ec0a83faa56163a63b8d66b0d176438292d6d8409cdf86cdcd1cc091a77d6"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.3.5.tar.gz"
+  sha256 "d80b781d2c2dfad2693669e623d5d02effcc3e8b4b1eb26579170e29ae21e27c"
   license "MIT"
   head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
   depends_on "python@3.11" # Using Python 3.11 as it's more stable in Homebrew
+
+  option "with-nvidia", "Install support for NVIDIA models"
+  option "with-whisper", "Install support for Whisper models"
 
   def install
     # Set up virtualenv
@@ -26,7 +29,6 @@ class Ctrlspeak < Formula
     uv_executable ||= Pathname.new(HOMEBREW_PREFIX)/"opt"/"uv"/"bin"/"uv"
 
     ohai "Starting package installation - this may take several minutes"
-    opoo "Large packages like torch, torchaudio, and nemo_toolkit will be downloaded (~1GB)"
 
     if uv_executable&.exist?
       ohai "Using uv for package installation"
@@ -34,11 +36,15 @@ class Ctrlspeak < Formula
         # Install requirements.txt first
         ohai "Installing core requirements"
         system uv_executable, "pip", "install", "-r", "requirements.txt", "--verbose"
-        
-        # Then install MLX requirements on ARM
-        if Hardware::CPU.arm?
-          ohai "Installing MLX requirements for Apple Silicon"
-          system uv_executable, "pip", "install", "-r", "requirements-mlx.txt", "--verbose"
+
+        if build.with? "nvidia"
+          ohai "Installing NVIDIA requirements"
+          system uv_executable, "pip", "install", "-r", "requirements-nvidia.txt", "--verbose"
+        end
+
+        if build.with? "whisper"
+          ohai "Installing Whisper requirements"
+          system uv_executable, "pip", "install", "-r", "requirements-whisper.txt", "--verbose"
         end
       end
     else
@@ -48,11 +54,15 @@ class Ctrlspeak < Formula
       # Install requirements.txt first
       ohai "Installing core requirements"
       system venv/"bin/pip", "install", "-r", "requirements.txt", "-v"
-      
-      # Then install MLX requirements on ARM
-      if Hardware::CPU.arm?
-        ohai "Installing MLX requirements for Apple Silicon"
-        system venv/"bin/pip", "install", "-r", "requirements-mlx.txt", "-v"
+
+      if build.with? "nvidia"
+        ohai "Installing NVIDIA requirements"
+        system venv/"bin/pip", "install", "-r", "requirements-nvidia.txt", "-v"
+      end
+
+      if build.with? "whisper"
+        ohai "Installing Whisper requirements"
+        system venv/"bin/pip", "install", "-r", "requirements-whisper.txt", "-v"
       end
     end
 
