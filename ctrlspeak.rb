@@ -1,8 +1,8 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.4.0.tar.gz"
-  sha256 "0b6c65fc1a12fe32db1a8384e0c33a96b62e4d0072f00de668f318a0a3bd2baf"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.5.0.tar.gz"
+  sha256 "20434ce3257d1799ca2eb265fdc6f18e3abd55843559412a8d59fd9cef12cb30"
   license "MIT"
   head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
@@ -73,6 +73,7 @@ class Ctrlspeak < Formula
     libexec.install Dir["*.py"]
     libexec.install "utils"
     libexec.install "models"
+    libexec.install "ui"
     libexec.install "on.wav"
     libexec.install "off.wav"
 
