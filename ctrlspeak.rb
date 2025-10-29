@@ -2,7 +2,7 @@ class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
   url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.5.0.tar.gz"
-  sha256 "20434ce3257d1799ca2eb265fdc6f18e3abd55843559412a8d59fd9cef12cb30"
+  sha256 "27f6230f7deafe8e364877fcc247b54ef7cf467bb9c8f8285e78de4123ab9f33"
   license "MIT"
   head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
