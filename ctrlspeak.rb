@@ -70,6 +70,10 @@ class Ctrlspeak < Formula
       end
     end
 
+    # libcst ships an optional native module whose install name cannot be
+    # rewritten by Homebrew's fixup pass. libcst falls back to pure Python.
+    rm_f Dir[venv/"lib/python3.11/site-packages/libcst/native*.so"]
+
     ohai "Copying application files"
     # Copy all Python files and necessary directories/files
     libexec.install Dir["*.py"]
