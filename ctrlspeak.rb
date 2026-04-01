@@ -12,8 +12,10 @@ class Ctrlspeak < Formula
   option "with-whisper", "Install support for Whisper models"
 
   def install
-    # Set up virtualenv
-    venv = libexec/"venv"
+    # Keep the virtualenv outside the keg so Homebrew doesn't try to rewrite
+    # install names inside third-party Python extension modules.
+    venv = var/"ctrlspeak/venv"
+    rm_rf venv
     system "python3.11", "-m", "venv", venv
 
     # Check for uv
@@ -70,10 +72,6 @@ class Ctrlspeak < Formula
       end
     end
 
-    # libcst ships an optional native module whose install name cannot be
-    # rewritten by Homebrew's fixup pass. libcst falls back to pure Python.
-    rm_f Dir[venv/"lib/python3.11/site-packages/libcst/native*.so"]
-
     ohai "Copying application files"
     # Copy all Python files and necessary directories/files
     libexec.install Dir["*.py"]
@@ -90,14 +88,14 @@ class Ctrlspeak < Formula
       #!/bin/bash
       source "#{venv}/bin/activate"
       # Set the Python path to include the libexec directory
-      export PYTHONPATH="#{libexec}:$PYTHONPATH"
+      export PYTHONPATH="#{opt_libexec}:$PYTHONPATH"
       # Set the dynamic library path to find the torch and torchaudio libraries
       TORCH_LIB_PATH="#{venv}/lib/python3.11/site-packages/torch/lib"
       TORCHAUDIO_LIB_PATH="#{venv}/lib/python3.11/site-packages/torchaudio/lib"
       # Add both library paths to DYLD_LIBRARY_PATH
       export DYLD_LIBRARY_PATH="$TORCH_LIB_PATH:$TORCHAUDIO_LIB_PATH:$DYLD_LIBRARY_PATH"
       # Run the script
-      python "#{libexec}/ctrlspeak.py" "$@"
+      python "#{opt_libexec}/ctrlspeak.py" "$@"
     EOS
 
     # Make the wrapper executable
