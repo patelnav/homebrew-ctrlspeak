@@ -1,8 +1,8 @@
 class Ctrlspeak < Formula
   desc "Minimal speech-to-text utility for macOS"
   homepage "https://github.com/patelnav/ctrlspeak"
-  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.7.0.tar.gz"
-  sha256 "2715fb22a5cd3d49587563b76b3748240979548cd8fb7afecc59e7d58466e101"
+  url "https://github.com/patelnav/ctrlspeak/archive/refs/tags/v1.8.0.tar.gz"
+  sha256 "ca8aa0a33eba212fc1f9ab65fa77d121f8001d110854f984f6151edf059cd884"
   license "MIT"
   head "file:///Users/navpatel/Developer/ctrlspeak", using: :git, branch: "main"
 
@@ -37,6 +37,7 @@ class Ctrlspeak < Formula
         ohai "Installing core requirements"
         system uv_executable, "pip", "install", "-r", "requirements.txt", "--verbose"
         system uv_executable, "pip", "install", "-r", "requirements-mlx.txt", "--verbose"
+        system uv_executable, "pip", "install", "-r", "requirements-cohere-mlx.txt", "--verbose"
 
         if build.with? "nvidia"
           ohai "Installing NVIDIA requirements"
@@ -56,6 +57,7 @@ class Ctrlspeak < Formula
       ohai "Installing core requirements"
       system venv/"bin/pip", "install", "-r", "requirements.txt", "-v"
       system venv/"bin/pip", "install", "-r", "requirements-mlx.txt", "-v"
+      system venv/"bin/pip", "install", "-r", "requirements-cohere-mlx.txt", "-v"
 
       if build.with? "nvidia"
         ohai "Installing NVIDIA requirements"
